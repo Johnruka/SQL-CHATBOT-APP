@@ -5,13 +5,14 @@ import org.example.sqlchatbotapp.service.AIService;
 import org.example.sqlchatbotapp.service.DatabaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:5173")
 public class QueryController {
 
     private final AIService aiService;
@@ -23,15 +24,27 @@ public class QueryController {
         this.databaseService = databaseService;
     }
 
+    @PostMapping("/generate-sql-query")
+    public ResponseEntity<?> generateSqlQuery(@RequestBody QueryRequest request) {
+        try {
+            String naturalLanguageQuery = request.getQuery();
+            String sqlQuery = aiService.generateSqlQuery(naturalLanguageQuery);
+            return ResponseEntity.ok(Map.of("sqlQuery", sqlQuery));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error generating SQL query: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/query")
     public ResponseEntity<?> getQuery(@RequestBody QueryRequest request) {
-        String naturalLanguageQuery = request.getQuery();
-        String sqlQuery = aiService.generateSqlQuery(naturalLanguageQuery);
+        try {
+            String sqlQuery = request.getQuery(); // Assume request contains SQL query from the frontend
+            List<Map<String, Object>> results = databaseService.executeQuery(sqlQuery);
+            return ResponseEntity.ok(results);
 
-        // Optional: Execute SQL query
-        // List<Map<String, Object>> results = databaseService.executeQuery(sqlQuery);
-
-        return ResponseEntity.ok(sqlQuery); // Returns SQL query for now
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error executing SQL query: " + e.getMessage());
+        }
     }
 }
-
