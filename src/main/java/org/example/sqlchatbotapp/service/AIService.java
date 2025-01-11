@@ -1,14 +1,10 @@
 package org.example.sqlchatbotapp.service;
 
 
-public class AIService {
+import org.example.sqlchatbotapp.exception.ServiceException;
 
-    public String generateSqlQuery(String naturalLanguageQuery) {
-        // Send naturalLanguageQuery to AI model/API
-        // Use response to construct valid SQL select query
-        // This part will depend heavily on the chosen AI API/SDK
+public interface AIService {
+    String generateSqlQuery(String naturalLanguageQuery) throws ServiceException;
 
-        // Example placeholder implementation
-        return "SELECT * FROM table WHERE condition";
     }
-}
+
