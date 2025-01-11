@@ -25,14 +25,14 @@ public class QueryController {
     }
 
     @PostMapping("/generate-sql-query")
-    public ResponseEntity<?> generateSqlQuery(@RequestBody QueryRequest request) {
+    public ResponseEntity<Map<String, String>> generateSqlQuery(@RequestBody QueryRequest request) {
         try {
             String naturalLanguageQuery = request.getQuery();
             String sqlQuery = aiService.generateSqlQuery(naturalLanguageQuery);
             return ResponseEntity.ok(Map.of("sqlQuery", sqlQuery));
-
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error generating SQL query: " + e.getMessage());
+            e.printStackTrace(); // Log the stack trace for debugging
+            return ResponseEntity.status(500).body(Map.of("error", "Error generating SQL query: " + e.getMessage()));
         }
     }
 
@@ -41,10 +41,14 @@ public class QueryController {
         try {
             String sqlQuery = request.getQuery(); // Assume request contains SQL query from the frontend
             List<Map<String, Object>> results = databaseService.executeQuery(sqlQuery);
-            return ResponseEntity.ok(results);
+
+            // Ensure the results are not null
+            return ResponseEntity.ok(results != null ? results : List.of());
 
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error executing SQL query: " + e.getMessage());
+            e.printStackTrace(); // Log the stack trace for debugging
+            return ResponseEntity.status(500).body(Map.of("error", "Error executing SQL query: " + e.getMessage()));
         }
     }
 }
+
